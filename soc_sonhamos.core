@@ -44,7 +44,7 @@ filesets:
   files_verilator_waiver:
     files:
     - tb/tb.vlt
-    - hw/rtl/cgra_top.vlt
+    - hw/soc_sonhamos/soc_sonhamos.vlt
     file_type: vlt
 
   systemverilog_only_simjtag:
@@ -86,6 +86,8 @@ filesets:
 
   tb-verilator:
     files:
+    - tb/XHEEP_CmdLineOptions.hh: { is_include_file: true }
+    - tb/XHEEP_CmdLineOptions.cpp
     - tb/tb_top.cpp
     file_type: cppSource
 

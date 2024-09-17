@@ -1,3 +1,4 @@
 env.sh
 build/
 *.log
+*.vcd

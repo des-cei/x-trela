@@ -110,6 +110,8 @@ module testharness #(
   );
 
   //pretending to be SWITCH CELLs that delay by SWITCH_ACK_LATENCY cycles the ACK signal
+  assign external_subsystem_powergate_switch_n = '1;
+
   logic
       tb_cpu_subsystem_powergate_switch_ack_n[SWITCH_ACK_LATENCY+1],
       tb_peripheral_subsystem_powergate_switch_ack_n[SWITCH_ACK_LATENCY+1];

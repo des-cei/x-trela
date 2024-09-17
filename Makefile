@@ -19,6 +19,15 @@ mcu-gen:
 verible:
 	util/format-verible
 
+## Verilator simulation with C++
+verilator-sim:
+	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=verilator $(FUSESOC_FLAGS) --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildsim.log
+
+run-app-verilator:
+	$(MAKE) app PROJECT=$(PROJECT)
+	cd build/ceiupm_systems_soc_sonhamos_0/sim-verilator/ && ./Vtestharness +firmware=../../../sw/build/main.hex
+	cat build/ceiupm_systems_soc_sonhamos_0/sim-verilator/uart0.log
+
 # Questasim simulation
 questasim-sim:
 	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=modelsim $(FUSESOC_FLAGS) --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildsim.log

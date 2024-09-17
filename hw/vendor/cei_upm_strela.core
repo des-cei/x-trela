@@ -46,7 +46,7 @@ filesets:
 
   files_verilator_waiver:
     files:
-    - cei_upm_strela/lint/cgra.vlt
+    - cei_upm_strela/lint/strela.vlt
     file_type: vlt
 
 targets:
