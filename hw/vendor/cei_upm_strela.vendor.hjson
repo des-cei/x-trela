@@ -1,0 +1,18 @@
+// Copyright EPFL
+// Licensed under the Solderpad Hardware License v2.1, see LICENSE.txt for details
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+{
+  name: "cei_upm_strela",
+  target_dir: "cei_upm_strela",
+
+  upstream: {
+    url: "git@github.com:des-cei/strela.git",
+    rev: "ce2f5813856a885fab2f104a7db37ff08e213a87",
+  },
+
+  patch_dir: "patches/cei_upm_strela",
+
+  exclude_from_upstream: [
+  ]
+}

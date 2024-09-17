@@ -1,0 +1,1 @@
+../hw/vendor/esl_epfl_x_heep/util/mcu_gen.py

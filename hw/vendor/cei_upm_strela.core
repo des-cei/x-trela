@@ -1,0 +1,58 @@
+CAPI=2:
+
+# Copyright 2022 EPFL
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+name: "ceiupm::strela"
+description: "CGRA HDL"
+
+filesets:
+  files_rtl:
+    depend:
+    - x-heep::packages
+    - pulp-platform.org::common_cells
+    files:
+    - cei_upm_strela/rtl/include/cgra_pkg.sv
+    - cei_upm_strela/rtl/csr.sv
+    - cei_upm_strela/rtl/control_unit.sv
+    - cei_upm_strela/rtl/counters.sv
+    - cei_upm_strela/rtl/config_memory_node.sv
+    - cei_upm_strela/rtl/deserializer.sv
+    - cei_upm_strela/rtl/input_memory_node.sv
+    - cei_upm_strela/rtl/output_memory_node.sv
+    - cei_upm_strela/rtl/cgra_top.sv
+    - cei_upm_strela/rtl/cgra/CGRA.sv
+    - cei_upm_strela/rtl/cgra/FF_rv.sv
+    - cei_upm_strela/rtl/cgra/fork_sender.sv
+    - cei_upm_strela/rtl/cgra/FU_data_superpolyvalent.sv
+    - cei_upm_strela/rtl/cgra/FU_control_superpolyvalent.sv
+    - cei_upm_strela/rtl/cgra/join_merge.sv
+    - cei_upm_strela/rtl/cgra/mux.sv
+    - cei_upm_strela/rtl/cgra/PC_superpolyvalent.sv
+    - cei_upm_strela/rtl/cgra/PE_superpolyvalent.sv
+    file_type: systemVerilogSource
+
+
+  files_behav_rtl:
+    files:
+    - cei_upm_strela/sim/cgra_clock_gate.sv
+    file_type: systemVerilogSource
+
+  files_wrap:
+    files:
+    - cei_upm_strela/wrapper/cgra_top_wrapper.sv
+    file_type: systemVerilogSource
+
+  files_verilator_waiver:
+    files:
+    - cei_upm_strela/lint/cgra.vlt
+    file_type: vlt
+
+targets:
+  default:
+    filesets:
+    - files_rtl
+    - files_wrap
+    - tool_verilator? (files_verilator_waiver)
+    - target_sim? (files_behav_rtl)
