@@ -41,6 +41,11 @@ run-app-questasim:
 	$(MAKE) -C build/ceiupm_systems_soc_sonhamos_0/sim-modelsim run RUN_OPT=1 PLUSARGS="c firmware=../../../sw/build/main.hex"
 	cat build/ceiupm_systems_soc_sonhamos_0/sim-modelsim/uart0.log
 
+FPGA_BOARD ?= pynq-z2
+
+vivado-fpga:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log
+
 vendor-xheep:
 	./util/vendor.py hw/vendor/esl_epfl_x_heep.vendor.hjson -v --update
 

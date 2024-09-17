@@ -127,13 +127,13 @@ module xilinx_soc_sonhamos_wrapper
   assign i2s_sck_io     = gpio[20];
   assign i2s_ws_io      = gpio[21];
   assign i2s_sd_io      = gpio[22];
-  assign spi2_cs_0_io   = gpio[23];
-  assign spi2_cs_1_io   = gpio[24];
-  assign spi2_sck_io    = gpio[25];
-  assign spi2_sd_0_io   = gpio[26];
-  assign spi2_sd_1_io   = gpio[27];
-  assign spi2_sd_2_io   = gpio[28];
-  assign spi2_sd_3_io   = gpio[29];
+  assign spi2_csb_o[0]  = gpio[23];
+  assign spi2_csb_o[1]  = gpio[24];
+  assign spi2_sck_o     = gpio[25];
+  assign spi2_sd_io[0]  = gpio[26];
+  assign spi2_sd_io[1]  = gpio[27];
+  assign spi2_sd_io[2]  = gpio[28];
+  assign spi2_sd_io[3]  = gpio[29];
   assign i2c_sda_io     = gpio[30];
   assign i2c_scl_io     = gpio[31];
 
