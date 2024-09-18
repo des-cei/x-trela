@@ -43,8 +43,8 @@ run-app-questasim:
 
 FPGA_BOARD ?= pynq-z2
 
-vivado-fpga:
-	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log
+vivado-fpga: mcu-gen
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) --flag=use_bscane_xilinx --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log
 
 vendor-xheep:
 	./util/vendor.py hw/vendor/esl_epfl_x_heep.vendor.hjson -v --update
