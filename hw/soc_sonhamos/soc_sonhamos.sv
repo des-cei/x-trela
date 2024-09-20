@@ -126,7 +126,7 @@ module soc_sonhamos #(
 
   // CGRA logic clock gating unit enable (always-on in this case)
   assign cgra_enable      = 1'b1;
-  assign cgra_logic_rst_n = external_subsystem_rst_n;
+  assign cgra_logic_rst_n = rst_ni && external_subsystem_rst_n;
 
   always_comb begin
     // All interrupt lines set to zero by default
@@ -134,7 +134,7 @@ module soc_sonhamos #(
       intr_vector_ext[i] = 1'b0;
     end
     // Re-assign the interrupt lines used here
-    intr_vector_ext[core_v_mini_mcu_pkg::NEXT_INT-1] = cgra_int;
+    intr_vector_ext[0] = cgra_int;
   end
 
   cgra_top_wrapper cgra_top_wrapper_i (
@@ -218,6 +218,7 @@ module soc_sonhamos #(
       .i2c_scl_io(gpio_io[31]),
       .exit_value_o,
       .intr_vector_ext_i(intr_vector_ext),
+      .cgra_ext_fast_intr_i(cgra_int),
       .xif_compressed_if(ext_if),
       .xif_issue_if(ext_if),
       .xif_commit_if(ext_if),

@@ -3,7 +3,7 @@
 
 #include "core_v_mini_mcu.h"
 
-#define CGRA_BASE_ADDR      EXT_SLAVE_START_ADDRESS
+#define CGRA_BASE_ADDR      EXT_PERIPHERAL_START_ADDRESS
 #define CGRA_CONF         	0x0
 #define CGRA_BS_ADDR      	0x4
 #define CGRA_BS_SIZE      	0x8

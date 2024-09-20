@@ -308,6 +308,7 @@ module core_v_mini_mcu
     output logic ext_debug_reset_no,
 
     input logic [NEXT_INT_RND-1:0] intr_vector_ext_i,
+    input logic cgra_ext_fast_intr_i,
 
     //power manager exposed to top level
     //signals are unrolled to easy EDA tools
@@ -522,7 +523,7 @@ module core_v_mini_mcu
   };
 
   assign fast_intr = {
-    1'b0,
+    cgra_ext_fast_intr_i,
     gpio_ao_intr,
     spi_flash_intr,
     spi_intr,
