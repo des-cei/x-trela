@@ -2,3 +2,4 @@ env.sh
 build/
 *.log
 *.vcd
+*cei_upm_strela_vendor/

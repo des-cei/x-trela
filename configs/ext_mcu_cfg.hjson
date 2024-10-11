@@ -5,7 +5,7 @@
 // Peripherals configuration for core-v-mini-mcu.
 {
 
-    cpu_type: cv32e20
+    cpu_type: cv32e40p
 
     linker_script: {
         stack_size: 0x800,

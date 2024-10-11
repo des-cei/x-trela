@@ -8,7 +8,7 @@
 
   upstream: {
     url: "git@github.com:des-cei/strela.git",
-    rev: "ce2f5813856a885fab2f104a7db37ff08e213a87",
+    rev: "93ea7a7f5e22bf9593078bcd2226b35c8b9fe0a6",
   },
 
   patch_dir: "patches/cei_upm_strela",

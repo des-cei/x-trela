@@ -13,17 +13,16 @@ filesets:
     - x-heep::packages
     - pulp-platform.org::common_cells
     files:
-    - cei_upm_strela/rtl/include/cgra_pkg.sv
-    - cei_upm_strela/rtl/csr.sv
+    - cei_upm_strela/rtl/include/strela_pkg.sv
+    - cei_upm_strela/rtl/strela_reg_pkg.sv
+    - cei_upm_strela/rtl/strela_reg_top.sv
+    - cei_upm_strela/rtl/mmio_interface.sv
     - cei_upm_strela/rtl/control_unit.sv
-    - cei_upm_strela/rtl/counters.sv
-    - cei_upm_strela/rtl/config_memory_node.sv
-    - cei_upm_strela/rtl/deserializer.sv
     - cei_upm_strela/rtl/input_memory_node.sv
     - cei_upm_strela/rtl/output_memory_node.sv
-    - cei_upm_strela/rtl/cgra_top.sv
+    - cei_upm_strela/rtl/strela_top.sv
     - cei_upm_strela/rtl/cgra/CGRA.sv
-    - cei_upm_strela/rtl/cgra/FF_rv.sv
+    - cei_upm_strela/rtl/cgra/elastic_buffer.sv
     - cei_upm_strela/rtl/cgra/fork_sender.sv
     - cei_upm_strela/rtl/cgra/FU_data_superpolyvalent.sv
     - cei_upm_strela/rtl/cgra/FU_control_superpolyvalent.sv
@@ -36,12 +35,12 @@ filesets:
 
   files_behav_rtl:
     files:
-    - cei_upm_strela/sim/cgra_clock_gate.sv
+    - cei_upm_strela/sim/strela_clock_gate.sv
     file_type: systemVerilogSource
 
   files_wrap:
     files:
-    - cei_upm_strela/wrapper/cgra_top_wrapper.sv
+    - cei_upm_strela/wrapper/strela_top_wrapper.sv
     file_type: systemVerilogSource
 
   files_verilator_waiver:

@@ -137,15 +137,15 @@ module soc_sonhamos #(
     intr_vector_ext[0] = cgra_int;
   end
 
-  cgra_top_wrapper cgra_top_wrapper_i (
+  strela_top_wrapper strela_top_wrapper_i (
       .clk_i,
       .rst_ni(cgra_logic_rst_n),
-      .cgra_enable_i(cgra_enable),
+      .en_i(cgra_enable),
       .masters_req_o(ext_master_req),
       .masters_resp_i(ext_master_resp),
       .reg_req_i(ext_periph_slave_req),
       .reg_rsp_o(ext_periph_slave_resp),
-      .cgra_int_o(cgra_int)
+      .intr_o(cgra_int)
   );
 
   // eXtension Interface

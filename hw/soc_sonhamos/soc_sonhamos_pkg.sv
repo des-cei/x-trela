@@ -9,7 +9,7 @@ package soc_sonhamos_pkg;
   import core_v_mini_mcu_pkg::*;
 
   // CGRA master ports
-  localparam CGRA_XBAR_NMASTER = 9;
+  localparam CGRA_XBAR_NMASTER = 8;
   // TODO: reduce X-HEEP masters to 4 for the interleaved memory
   // localparam EXT_XBAR_NMASTER = 4;
   localparam EXT_XBAR_NSLAVE = 1;
