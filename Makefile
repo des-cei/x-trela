@@ -14,6 +14,7 @@ PROJECT ?= hello_world_soc_sonhamos
 mcu-gen:
 	$(MAKE) -C hw/vendor/esl_epfl_x_heep X_HEEP_CFG=$(BASE_DIR)/$(X_HEEP_CFG) MCU_CFG_PERIPHERALS=$(BASE_DIR)/$(MCU_CFG_PERIPHERALS) PAD_CFG=$(BASE_DIR)/$(PAD_CFG) mcu-gen
 	$(PYTHON) util/mcu_gen.py --config $(X_HEEP_CFG) --cfg_peripherals $(MCU_CFG_PERIPHERALS) --pads_cfg $(PAD_CFG) --outdir tb/ --tpl-sv tb/tb_util.svh.tpl
+	bash -c "cd hw/vendor/cei_upm_strela/data; source gen_strela_regs.sh; cd ../../../../"
 	$(MAKE) verible
 
 verible:
