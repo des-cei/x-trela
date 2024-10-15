@@ -13,7 +13,12 @@ module xilinx_soc_sonhamos_wrapper
     parameter CLK_LED_COUNT_LENGTH = 27
 ) (
 
+`ifdef FPGA_VC709
+    input logic sys_diff_clock_clk_n,
+    input logic sys_diff_clock_clk_p,
+`else
     inout logic clk_i,
+`endif
     inout logic rst_i,
 
     output logic rst_led_o,
@@ -86,11 +91,18 @@ module xilinx_soc_sonhamos_wrapper
   // eXtension Interface
   if_xif #() ext_if ();
 
-  // FPGA PYNQ-Z2
+`ifdef FPGA_VC709
+  xilinx_clk_wizard_wrapper xilinx_clk_wizard_wrapper_i (
+      .sys_diff_clock_clk_n,
+      .sys_diff_clock_clk_p,
+      .clk_out1_0(clk_gen)
+  );
+`else  // FPGA PYNQ-Z2
   xilinx_clk_wizard_wrapper xilinx_clk_wizard_wrapper_i (
       .clk_125MHz(clk_i),
       .clk_out1_0(clk_gen)
   );
+`endif
 
   soc_sonhamos #(
       .COREV_PULP(COREV_PULP),

@@ -47,7 +47,7 @@ run-gui-app-questasim:
 	$(MAKE) -C build/ceiupm_systems_soc_sonhamos_0/sim-modelsim run-gui RUN_OPT=1 PLUSARGS="c firmware=../../../sw/build/main.hex"
 	cat build/ceiupm_systems_soc_sonhamos_0/sim-modelsim/uart0.log
 
-FPGA_BOARD ?= pynq-z2
+FPGA_BOARD ?= vc709
 
 vivado-fpga: mcu-gen
 	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) --flag=use_bscane_xilinx --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log

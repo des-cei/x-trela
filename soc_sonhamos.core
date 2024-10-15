@@ -99,8 +99,8 @@ filesets:
   rtl-fpga:
     files:
     - hw/fpga/sram_wrapper.sv
-    - hw/fpga_wrapper/strela_clock_gate.sv
-    - hw/fpga_wrapper/xilinx_soc_sonhamos_wrapper.sv
+    - hw/fpga_ext/strela_clock_gate.sv
+    - hw/fpga_ext/xilinx_soc_sonhamos_wrapper.sv
     file_type: systemVerilogSource
 
   ip-fpga:
@@ -121,10 +121,19 @@ filesets:
     files:
     - hw/fpga/scripts/pynq-z2/xilinx_generate_clk_wizard.tcl:  { file_type: tclSource }
 
+  ip-fpga-vc709:
+    files:
+    - hw/fpga_ext/scripts/vc709/xilinx_generate_clk_wizard.tcl:  { file_type: tclSource }
+
   xdc-fpga-pynq-z2:
     files:
-    - hw/fpga_wrapper/constraints/pin_assign.xdc
+    - hw/fpga/constraints/pynq-z2/pin_assign.xdc
     - hw/fpga/constraints/pynq-z2/constraints.xdc
+    file_type: xdc
+
+  xdc-fpga-vc709:
+    files:
+    - hw/fpga_ext/constraints/pin_assign.xdc
     file_type: xdc
 
 parameters:
@@ -177,6 +186,10 @@ parameters:
     paramtype: vlogdefine
     default: false
   FPGA_SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+  FPGA_VC709:
     datatype: bool
     paramtype: vlogdefine
     default: false
@@ -320,4 +333,30 @@ targets:
         part: xc7z020clg400-1
         board_part: tul.com.tw:pynq-z2:part0:1.0
         board_repo_paths: [../../../hw/fpga/board_files/vendor/esl_epfl_pynq_z2_board_files]
+    toplevel: [xilinx_soc_sonhamos_wrapper]
+
+  vc709:
+    <<: *default_target
+    default_tool: vivado
+    description: Xilinx VC709 Evaluation Board
+    filesets_append:
+    - rtl-fpga
+    - ip-fpga
+    - ip-fpga-vc709
+    - xdc-fpga-vc709
+    - ext_bus
+    - x_heep_system
+    parameters:
+    - COREV_PULP
+    - FPU
+    - X_EXT
+    - SYNTHESIS=true
+    - REMOVE_OBI_FIFO
+    - FPGA_SYNTHESIS=true
+    - FPGA_VC709=true
+    tools:
+      vivado:
+        part: xc7vx690tffg1761-2
+        board_part: xilinx.com:vc709:part0:1.8
+        # board_repo_paths: [../../../hw/fpga/board_files/vendor/esl_epfl_pynq_z2_board_files]
     toplevel: [xilinx_soc_sonhamos_wrapper]
