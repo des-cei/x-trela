@@ -30,8 +30,8 @@ set_property -dict {PACKAGE_PIN L29 IOSTANDARD LVCMOS18} [get_ports {spi_flash_s
 set_property -dict {PACKAGE_PIN L30 IOSTANDARD LVCMOS18} [get_ports {spi_flash_sd_io[3]}]
 
 # UART
-set_property -dict {PACKAGE_PIN AU33 IOSTANDARD LVCMOS18} [get_ports uart_tx_o]
-set_property -dict {PACKAGE_PIN AU36 IOSTANDARD LVCMOS18} [get_ports uart_rx_i]
+set_property -dict {PACKAGE_PIN AU36 IOSTANDARD LVCMOS18} [get_ports uart_tx_o]
+set_property -dict {PACKAGE_PIN AU33 IOSTANDARD LVCMOS18} [get_ports uart_rx_i]
 
 #JTAG (FMC dummy)
 set_property -dict {PACKAGE_PIN J31 IOSTANDARD LVCMOS18} [get_ports jtag_tdi_i]

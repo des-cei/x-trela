@@ -133,7 +133,7 @@ filesets:
 
   xdc-fpga-vc709:
     files:
-    - hw/fpga_ext/constraints/pin_assign.xdc
+    - hw/fpga_ext/constraints/vc709/pin_assign.xdc
     file_type: xdc
 
 parameters:
