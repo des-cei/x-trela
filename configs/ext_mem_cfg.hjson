@@ -3,7 +3,7 @@
     bus_type: "NtoM",
     ram_banks: {
         code_and_data: {
-            num: 2
+            num: 4
             sizes: 32
         }
         data_interleaved: {

@@ -17,14 +17,14 @@
 #define PRINTF_IN_SIM   0
 
 #if TARGET_SIM && PRINTF_IN_SIM
-        #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
-#elif PRINTF_IN_FPGA && !TARGET_SIM
+    #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
+#elif TARGET_IS_FPGA && PRINTF_IN_FPGA
     #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
 #else
     #define PRINTF(...)
 #endif
 
-#define SIZE 2000
+#define SIZE 100
 
 volatile int32_t a[SIZE] __attribute__((section(".xheep_data_interleaved")));
 volatile int32_t b[SIZE] __attribute__((section(".xheep_data_interleaved")));
@@ -153,10 +153,10 @@ int main(int argc, char *argv[])
 
     mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x10);
 
-    printf("Total cycles: %lu\r\n", total_cycles);
-    printf("Conf. cycles: %lu\r\n", conf_cycles);
-    printf("Exec. cycles: %lu\r\n", exec_cycles);
-    printf("Stall cycles: %lu\r\n", stall_cycles);
+    PRINTF("Total cycles: %lu\r\n", total_cycles);
+    PRINTF("Conf. cycles: %lu\r\n", conf_cycles);
+    PRINTF("Exec. cycles: %lu\r\n", exec_cycles);
+    PRINTF("Stall cycles: %lu\r\n", stall_cycles);
 
     PRINTF("Finishing STRELA test application...\r\n");
     return 0;
