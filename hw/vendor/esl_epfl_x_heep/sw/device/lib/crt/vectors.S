@@ -77,8 +77,8 @@ vector_table:
 	j handler_irq_fast_gpio_6
 	// 29 : fast interrupt - gpio_7
 	j handler_irq_fast_gpio_7
-	// 30 : fast interrupt - cgra
-	j handler_irq_fast_cgra
+	// 30 : fast interrupt - strela
+	j handler_irq_fast_strela
 	// vendor interrupts: on Ibex interrupt id 31 is for non-maskable interrupts
 	j __no_irq_handler
 	// 64-32 : not connected on Ibex

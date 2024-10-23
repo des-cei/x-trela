@@ -189,12 +189,12 @@ INTERRUPT_HANDLER_ABI void handler_irq_fast_gpio_6(void);
 INTERRUPT_HANDLER_ABI void handler_irq_fast_gpio_7(void);
 
 /**
- * @brief Fast cgra irq handler. The first entry point when cgra interrupt
+ * @brief Fast strela irq handler. The first entry point when strela interrupt
  * is recieved through fic.
  * This function clear the responsible bit in FAST_INTR_PENDING then call a
  * function that can be overriden inside peripherals.
  */
-INTERRUPT_HANDLER_ABI void handler_irq_fast_cgra(void);
+INTERRUPT_HANDLER_ABI void handler_irq_fast_strela(void);
 
 /****************************************************************************/
 /**                                                                        **/
@@ -312,7 +312,7 @@ __attribute__((weak, optimize("O0"))) void fic_irq_gpio_7(void)
     /* Users should implement their non-weak version */
 }
 
-__attribute__((weak, optimize("O0"))) void fic_irq_cgra(void)
+__attribute__((weak, optimize("O0"))) void fic_irq_strela(void)
 {
     /* Users should implement their non-weak version */
 }
@@ -435,12 +435,12 @@ void handler_irq_fast_gpio_7(void)
     fic_irq_gpio_7();
 }
 
-void handler_irq_fast_cgra(void)
+void handler_irq_fast_strela(void)
 {
     // The interrupt is cleared.
-    clear_fast_interrupt(kCgra_fic_e);
+    clear_fast_interrupt(kStrela_fic_e);
     // call the weak fic handler
-    fic_irq_cgra();
+    fic_irq_strela();
 }
 
 #ifdef __cplusplus

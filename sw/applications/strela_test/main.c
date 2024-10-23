@@ -8,11 +8,23 @@
 #include "mmio.h"
 #include "csr.h"
 #include "csr_registers.h"
-#include "cgra.h"
+#include "strela.h"
 #include "strela_regs.h"
 #include "kernels.h"
 
-#define SIZE 10
+/* By default, printfs are activated for FPGA and disabled for simulation. */
+#define PRINTF_IN_FPGA  1
+#define PRINTF_IN_SIM   0
+
+#if TARGET_SIM && PRINTF_IN_SIM
+        #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
+#elif PRINTF_IN_FPGA && !TARGET_SIM
+    #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
+#else
+    #define PRINTF(...)
+#endif
+
+#define SIZE 2000
 
 volatile int32_t a[SIZE] __attribute__((section(".xheep_data_interleaved")));
 volatile int32_t b[SIZE] __attribute__((section(".xheep_data_interleaved")));
@@ -27,13 +39,16 @@ volatile int32_t h[SIZE] __attribute__((section(".xheep_data_interleaved")));
 mmio_region_t cgra;
 volatile uint8_t cgra_intr_flag;
 
-void fic_irq_cgra(void) {
+void fic_irq_strela(void) {
     cgra_intr_flag = 1;
 }
 // ---------------- CGRA definitions ---------------- //
 
 int main(int argc, char *argv[])
 {
+    PRINTF("\r\n");
+    PRINTF("Starting STRELA test application...\r\n");
+
 	// Core configurations
     enable_all_fast_interrupts(true);
     // Enable interrupt on processor side
@@ -53,7 +68,7 @@ int main(int argc, char *argv[])
     }
 
     // Constant CGRA parameters
-    cgra = mmio_region_from_addr(CGRA_BASE_ADDR);
+    cgra = mmio_region_from_addr(STRELA_BASE_ADDR);
     const uint32_t in_param = (sizeof(int32_t) << 16) | SIZE * sizeof(int32_t);
     const uint32_t out_param = SIZE * sizeof(int32_t);
 
@@ -138,11 +153,11 @@ int main(int argc, char *argv[])
 
     mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x10);
 
-    // printf("T: %lu\n", total_cycles);
-    // printf("C: %lu\n", conf_cycles);
-    // printf("E: %lu\n", exec_cycles);
-    // printf("S: %lu\n", stall_cycles);
+    printf("Total cycles: %lu\r\n", total_cycles);
+    printf("Conf. cycles: %lu\r\n", conf_cycles);
+    printf("Exec. cycles: %lu\r\n", exec_cycles);
+    printf("Stall cycles: %lu\r\n", stall_cycles);
 
-
+    PRINTF("Finishing STRELA test application...\r\n");
     return 0;
 }

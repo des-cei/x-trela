@@ -22,7 +22,7 @@
 int main(int argc, char *argv[])
 {
     /* write something to stdout */
-    printf("Sonhamos SoC is alive!\n");
+    printf("Sonhamos SoC is alive!\r\n");
     return EXIT_SUCCESS;
 }
 
