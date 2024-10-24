@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "core_v_mini_mcu.h"
+#include "x-heep.h"
 #include "hart.h"
 #include "handler.h"
 #include "fast_intr_ctrl.h"
@@ -104,8 +105,8 @@ int main(int argc, char *argv[])
     for(int i = 0; i < DATA_SIZE; i++)
         if(output[i] != expected_result[i]) error++;
 
-    if(error) PRINTF("Execution failed with %d errrors!!!\r\n", error);
-    else PRINTF("Execution finished successfully!\r\n");
+    if(error) PRINTF("FAIL with %d errrors!!!\r\n", error);
+    else PRINTF("SUCCESS!\r\n");
 
 
     PRINTF("Finishing STRELA ReLU application...\r\n");

@@ -56,10 +56,11 @@ openocd:
 	openocd -f tb/core-v-mini-mcu-vc709-bscan.cfg
 
 gdb:
+	$(MAKE) app PROJECT=$(PROJECT) TARGET=pynq-z2
 	riscv32-unknown-elf-gdb -x connect_gdb sw/build/main.elf
 
 minicom:
-	minicom -b 115200 -D /dev/ttyUSB2
+	minicom -b 115200 -D $(DEVICE)
 
 vendor-xheep:
 	./util/vendor.py hw/vendor/esl_epfl_x_heep.vendor.hjson -v --update

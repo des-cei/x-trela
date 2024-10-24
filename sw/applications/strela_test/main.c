@@ -11,6 +11,7 @@
 #include "strela.h"
 #include "strela_regs.h"
 #include "kernels.h"
+#include "x-heep.h"
 
 /* By default, printfs are activated for FPGA and disabled for simulation. */
 #define PRINTF_IN_FPGA  1
@@ -18,13 +19,14 @@
 
 #if TARGET_SIM && PRINTF_IN_SIM
     #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
+    #define SIZE 100
 #elif TARGET_IS_FPGA && PRINTF_IN_FPGA
     #define PRINTF(fmt, ...)    printf(fmt, ## __VA_ARGS__)
+    #define SIZE 2000
 #else
     #define PRINTF(...)
+    #define SIZE 100
 #endif
-
-#define SIZE 100
 
 volatile int32_t a[SIZE] __attribute__((section(".xheep_data_interleaved")));
 volatile int32_t b[SIZE] __attribute__((section(".xheep_data_interleaved")));
