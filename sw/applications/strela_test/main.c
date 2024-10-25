@@ -38,11 +38,11 @@ volatile int32_t g[SIZE] __attribute__((section(".xheep_data_interleaved")));
 volatile int32_t h[SIZE] __attribute__((section(".xheep_data_interleaved")));
 
 // ---------------- CGRA definitions ---------------- //
-mmio_region_t cgra;
-volatile uint8_t cgra_intr_flag;
+mmio_region_t strela;
+volatile uint8_t strela_intr_flag;
 
 void fic_irq_strela(void) {
-    cgra_intr_flag = 1;
+    strela_intr_flag = 1;
 }
 // ---------------- CGRA definitions ---------------- //
 
@@ -70,90 +70,290 @@ int main(int argc, char *argv[])
     }
 
     // Constant CGRA parameters
-    cgra = mmio_region_from_addr(STRELA_BASE_ADDR);
+    strela = mmio_region_from_addr(STRELA_BASE_ADDR);
     const uint32_t in_param = (sizeof(int32_t) << 16) | SIZE * sizeof(int32_t);
     const uint32_t out_param = SIZE * sizeof(int32_t);
 
-    // CGRA execution
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x1E); // RST all + PERF CTR en
+    volatile uint32_t total_cycles;
+    volatile uint32_t conf_cycles;
+    volatile uint32_t exec_cycles;
+    volatile uint32_t stall_cycles;
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
+    // CGRA first execution (poling mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
     
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x09); // START + PERF CTR en
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done
-    cgra_intr_flag = 0;
-    while(cgra_intr_flag == 0) wait_for_interrupt();
+    // Wait CGRA is done (poling mode)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x09); // START + PERF CTR en
-    // Wait CGRA is done
-    cgra_intr_flag = 0;
-    while(cgra_intr_flag == 0) wait_for_interrupt();
+    // CGRA second execution: check global clear (poling mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x0A); // CLR CONF + PERF CTR en
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
-
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
     
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x09); // START + PERF CTR en
+    // Wait CGRA is done (poling mode)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // Wait CGRA is done
-    cgra_intr_flag = 0;
-    while(cgra_intr_flag == 0) wait_for_interrupt();
+    // CGRA third execution: check parameters clear (poling mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_PARAM_BIT);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x0C); // CHN CONF + PERF CTR en
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
     
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x09); // START + PERF CTR en
+    // Wait CGRA is done (poling mode)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // Wait CGRA is done
-    cgra_intr_flag = 0;
-    while(cgra_intr_flag == 0) wait_for_interrupt();
+    // CGRA fourth execution: check CGRA configuration clear (poling mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_CONF_BIT);
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    volatile uint32_t total_cycles = mmio_region_read32(cgra, (ptrdiff_t) STRELA_PERF_CTR_TOTAL_CYCLES_REG_OFFSET);
-    volatile uint32_t conf_cycles = mmio_region_read32(cgra, (ptrdiff_t) STRELA_PERF_CTR_CONF_CYCLES_REG_OFFSET);
-    volatile uint32_t exec_cycles = mmio_region_read32(cgra, (ptrdiff_t) STRELA_PERF_CTR_EXEC_CYCLES_REG_OFFSET);
-    volatile uint32_t stall_cycles = mmio_region_read32(cgra, (ptrdiff_t) STRELA_PERF_CTR_STALL_CYCLES_REG_OFFSET);
+    // Wait CGRA is done (poling mode)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    mmio_region_write32(cgra, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x10);
+    // CGRA fifth execution (poling mode + perf ctr)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_PERF_CTR_EN_BIT); // en perf ctr
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (poling mode + perf ctr)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
+
+    // CGRA sixth execution: check parameters clear (poling mode + perf ctr)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_PARAM_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (poling mode)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
+
+    // CGRA seventh execution: check CGRA configuration clear (poling mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_CONF_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (poling mode)
+    while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
+
+    // Disable perf ctr + read values
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 0);
+
+    total_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_TOTAL_CYCLES_REG_OFFSET);
+    conf_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_CONF_CYCLES_REG_OFFSET);
+    exec_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_EXEC_CYCLES_REG_OFFSET);
+    stall_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_STALL_CYCLES_REG_OFFSET);
+
+    PRINTF("Total cycles: %lu\r\n", total_cycles);
+    PRINTF("Conf. cycles: %lu\r\n", conf_cycles);
+    PRINTF("Exec. cycles: %lu\r\n", exec_cycles);
+    PRINTF("Stall cycles: %lu\r\n", stall_cycles);
+
+    // CGRA first execution (iterrupt mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_INTR_EN_BIT);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // CGRA second execution: check global clear (iterrupt mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_INTR_EN_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // CGRA third execution: check parameters clear (iterrupt mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_PARAM_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // CGRA fourth execution: check CGRA configuration clear (iterrupt mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_CONF_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // CGRA fifth execution (iterrupt mode + perf ctr)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_PERF_CTR_EN_BIT | 1 << STRELA_MODE_INTR_EN_BIT);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode + perf ctr)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // CGRA sixth execution: check parameters clear (iterrupt mode + perf ctr)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_PARAM_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, b);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, c);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, d);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, e);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, f);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, g);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, h);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // CGRA seventh execution: check CGRA configuration clear (iterrupt mode)
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_CONF_BIT);
+
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
+    
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
+
+    // Wait CGRA is done (iterrupt mode)
+    strela_intr_flag = 0;
+    while(strela_intr_flag == 0) wait_for_interrupt();
+
+    // Disable perf ctr + read values
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 0);
+
+    total_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_TOTAL_CYCLES_REG_OFFSET);
+    conf_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_CONF_CYCLES_REG_OFFSET);
+    exec_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_EXEC_CYCLES_REG_OFFSET);
+    stall_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_STALL_CYCLES_REG_OFFSET);
 
     PRINTF("Total cycles: %lu\r\n", total_cycles);
     PRINTF("Conf. cycles: %lu\r\n", conf_cycles);
