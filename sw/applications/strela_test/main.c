@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     volatile uint32_t exec_cycles;
     volatile uint32_t stall_cycles;
 
-    // CGRA first execution (poling mode)
+    // CGRA first execution (polling mode)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
@@ -101,10 +101,10 @@ int main(int argc, char *argv[])
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode)
+    // Wait CGRA is done (polling mode)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // CGRA second execution: check global clear (poling mode)
+    // CGRA second execution: check global clear (polling mode)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
@@ -128,10 +128,10 @@ int main(int argc, char *argv[])
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode)
+    // Wait CGRA is done (polling mode)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // CGRA third execution: check parameters clear (poling mode)
+    // CGRA third execution: check parameters clear (polling mode)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_PARAM_BIT);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
@@ -154,28 +154,28 @@ int main(int argc, char *argv[])
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode)
+    // Wait CGRA is done (polling mode)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // CGRA fourth execution: check CGRA configuration clear (poling mode)
+    // CGRA fourth execution: check CGRA configuration clear (polling mode)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_CONF_BIT);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode)
+    // Wait CGRA is done (polling mode)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // CGRA fifth execution (poling mode + perf ctr)
+    // CGRA fifth execution (polling mode + perf ctr)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_PERF_CTR_EN_BIT); // en perf ctr
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode + perf ctr)
+    // Wait CGRA is done (polling mode + perf ctr)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // CGRA sixth execution: check parameters clear (poling mode + perf ctr)
+    // CGRA sixth execution: check parameters clear (polling mode + perf ctr)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_PARAM_BIT);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, a);
@@ -198,17 +198,17 @@ int main(int argc, char *argv[])
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode)
+    // Wait CGRA is done (polling mode)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
-    // CGRA seventh execution: check CGRA configuration clear (poling mode)
+    // CGRA seventh execution: check CGRA configuration clear (polling mode)
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_CONF_BIT);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, bypass_kernel);
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
-    // Wait CGRA is done (poling mode)
+    // Wait CGRA is done (polling mode)
     while(!(mmio_region_read32(strela, (ptrdiff_t) STRELA_STATUS_REG_OFFSET) & 0x1));
 
     // Disable perf ctr + read values

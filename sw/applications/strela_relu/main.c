@@ -62,7 +62,8 @@ int main(int argc, char *argv[])
     uint32_t out3_param = (chunk+rest) * sizeof(int32_t);
 
     // STRELA execution
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x1E); // RST all + PERF CTR en
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_PERF_CTR_EN_BIT | 1 << STRELA_MODE_INTR_EN_BIT);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, relu_kernel);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, input);
@@ -79,21 +80,21 @@ int main(int argc, char *argv[])
     mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, &output[2*chunk]);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out3_param);
     
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x09); // START + PERF CTR en
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
     // Wait STRELA is done
     strela_intr_flag = 0;
     while(strela_intr_flag == 0) wait_for_interrupt();
 
     // Stop STRELA and print execution report
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x00);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 0);
 
     volatile uint32_t total_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_TOTAL_CYCLES_REG_OFFSET);
     volatile uint32_t conf_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_CONF_CYCLES_REG_OFFSET);
     volatile uint32_t exec_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_EXEC_CYCLES_REG_OFFSET);
     volatile uint32_t stall_cycles = mmio_region_read32(strela, (ptrdiff_t) STRELA_PERF_CTR_STALL_CYCLES_REG_OFFSET);
 
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 0x10);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
 
     PRINTF("Total cycles: %lu\r\n", total_cycles);
     PRINTF("Conf. cycles: %lu\r\n", conf_cycles);
