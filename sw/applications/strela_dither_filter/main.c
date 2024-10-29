@@ -54,31 +54,23 @@ int main(int argc, char *argv[])
 
     // STRELA parameters
     strela = mmio_region_from_addr(STRELA_BASE_ADDR);
-    const int chunk = DATA_SIZE / 3;
-    const int rest = DATA_SIZE % 3;
-    const uint32_t in12_param = (sizeof(int32_t) << 16) | chunk * sizeof(int32_t);
-    const uint32_t out12_param = chunk * sizeof(int32_t);
-    const uint32_t in3_param = (sizeof(int32_t) << 16) | (chunk+rest) * sizeof(int32_t);
-    const uint32_t out3_param = (chunk+rest) * sizeof(int32_t);
+    const int chunk = DATA_SIZE;
+    const int rest = 0;
+    const uint32_t in1_param = (sizeof(int32_t) << 16) | chunk * sizeof(int32_t);
+    const uint32_t out1_param = chunk * sizeof(int32_t);
+    const uint32_t in2_param = (sizeof(int32_t) << 16) | (chunk+rest) * sizeof(int32_t);
+    const uint32_t out2_param = (chunk+rest) * sizeof(int32_t);
 
     // STRELA execution
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_PERF_CTR_EN_BIT | 1 << STRELA_MODE_INTR_EN_BIT);
 
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, relu_kernel);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, dither_filter_kernel);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, input);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in12_param);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, &input[chunk]);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in12_param);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, &input[2*chunk]);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in3_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in1_param);
 
     mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, output);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out12_param);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, &output[chunk]);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out12_param);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, &output[2*chunk]);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out3_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out1_param);
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
