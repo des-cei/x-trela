@@ -38,7 +38,7 @@ void fic_irq_strela(void) {
 int main(int argc, char *argv[])
 {
     PRINTF("\r\n");
-    PRINTF("Starting STRELA dither filter application...\r\n");
+    PRINTF("Starting STRELA FFT application...\r\n");
     PRINTF("Vector size: %lu\r\n", DATA_SIZE);
 
     // Core configurations ------------
@@ -54,23 +54,32 @@ int main(int argc, char *argv[])
 
     // STRELA parameters
     strela = mmio_region_from_addr(STRELA_BASE_ADDR);
-    const int chunk = DATA_SIZE;
-    const int rest = 0;
-    const uint32_t in1_param = (sizeof(int32_t) << 16) | chunk * sizeof(int32_t);
-    const uint32_t out1_param = chunk * sizeof(int32_t);
-    const uint32_t in2_param = (sizeof(int32_t) << 16) | (chunk+rest) * sizeof(int32_t);
-    const uint32_t out2_param = (chunk+rest) * sizeof(int32_t);
+    const int32_t G = DATA_SIZE/2; // DATA_SIZE must be odd
+    const uint32_t in_param = (sizeof(int32_t) << 16) | G * sizeof(int32_t);
+    const uint32_t out_param = G * sizeof(int32_t);
 
     // STRELA execution
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_CLR_BIT);
     mmio_region_write32(strela, (ptrdiff_t) STRELA_MODE_REG_OFFSET, 1 << STRELA_MODE_PERF_CTR_EN_BIT | 1 << STRELA_MODE_INTR_EN_BIT);
 
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, dither_filter_kernel);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, input);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in1_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_CONF_ADDR_REG_OFFSET, fft_kernel);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_ADDR_REG_OFFSET, &real[G]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_0_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_ADDR_REG_OFFSET, &real[0]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_1_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_ADDR_REG_OFFSET, &imag[0]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_2_PARAM_REG_OFFSET, in_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_ADDR_REG_OFFSET, &imag[G]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_IMN_3_PARAM_REG_OFFSET, in_param);
 
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, output);
-    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out1_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_ADDR_REG_OFFSET, &real[G]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_0_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_ADDR_REG_OFFSET, &real[0]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_1_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_ADDR_REG_OFFSET, &imag[G]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_2_SIZE_REG_OFFSET, out_param);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_ADDR_REG_OFFSET, &imag[0]);
+    mmio_region_write32(strela, (ptrdiff_t) STRELA_OMN_3_SIZE_REG_OFFSET, out_param);
     
     mmio_region_write32(strela, (ptrdiff_t) STRELA_CTRL_REG_OFFSET, 1 << STRELA_CTRL_START_BIT);
 
@@ -95,13 +104,15 @@ int main(int argc, char *argv[])
 
     // Check results
     int error = 0;
-    for(int i = 0; i < DATA_SIZE; i++)
-        if(output[i] != expected_result[i]) error++;
+    for(int i = 0; i < G; i++){
+        if(real[i] != expected_real[i]) error++;
+        if(imag[i] != expected_imag[i]) error++;
+    }
 
     if(error) PRINTF("FAIL with %d errrors!!!\r\n", error);
     else PRINTF("SUCCESS!\r\n");
 
 
-    PRINTF("Finishing STRELA dither filter application...\r\n");
+    PRINTF("Finishing STRELA FFT application...\r\n");
     return error;
 }
