@@ -2,7 +2,7 @@
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
-module xilinx_soc_sonhamos_wrapper
+module xilinx_x_trela_wrapper
   import obi_pkg::*;
   import reg_pkg::*;
 #(
@@ -104,12 +104,12 @@ module xilinx_soc_sonhamos_wrapper
   );
 `endif
 
-  soc_sonhamos #(
+  x_trela #(
       .COREV_PULP(COREV_PULP),
       .FPU(FPU),
       .ZFINX(ZFINX),
       .X_EXT(X_EXT)
-    ) soc_sonhamos_i (
+    ) x_trela_i (
       .clk_i( clk_gen ),
       .rst_ni( rst_n ),
       .jtag_tdo_o,

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // Daniel Vazquez (daniel.vazquez@upm.es)
 
-module soc_sonhamos #(
+module x_trela #(
     parameter COREV_PULP = 0,
     parameter FPU = 0,
     parameter ZFINX = 0,
@@ -40,17 +40,17 @@ module soc_sonhamos #(
 
   import obi_pkg::*;
   import reg_pkg::*;
-  import soc_sonhamos_pkg::*;
+  import x_trela_pkg::*;
 
   // External master and peripheral ports
   reg_req_t ext_xbar_slave_req;
   reg_rsp_t ext_xbar_slave_resp;
   reg_req_t ext_periph_slave_req;
   reg_rsp_t ext_periph_slave_resp;
-  obi_req_t [soc_sonhamos_pkg::CGRA_XBAR_NMASTER-1:0] ext_master_req;
-  obi_resp_t [soc_sonhamos_pkg::CGRA_XBAR_NMASTER-1:0] ext_master_resp;
-  obi_req_t [soc_sonhamos_pkg::CGRA_XBAR_NMASTER-1:0] heep_slave_req;
-  obi_resp_t [soc_sonhamos_pkg::CGRA_XBAR_NMASTER-1:0] heep_slave_resp;
+  obi_req_t [x_trela_pkg::CGRA_XBAR_NMASTER-1:0] ext_master_req;
+  obi_resp_t [x_trela_pkg::CGRA_XBAR_NMASTER-1:0] ext_master_resp;
+  obi_req_t [x_trela_pkg::CGRA_XBAR_NMASTER-1:0] heep_slave_req;
+  obi_resp_t [x_trela_pkg::CGRA_XBAR_NMASTER-1:0] heep_slave_resp;
 
   // Unconnected signals
   obi_req_t heep_core_instr_req;
@@ -252,4 +252,4 @@ module soc_sonhamos #(
       .ext_dma_stop_i('0)
   );
 
-endmodule  // soc_sonhamos
+endmodule  // x_trela

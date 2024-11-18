@@ -9,7 +9,7 @@ MCU_CFG_PERIPHERALS ?= configs/ext_mcu_cfg.hjson
 X_HEEP_CFG ?= configs/ext_mem_cfg.hjson
 PAD_CFG ?= configs/ext_pad_cfg.hjson
 
-PROJECT ?= hello_world_soc_sonhamos
+PROJECT ?= hello_world_ext
 
 mcu-gen:
 	$(MAKE) -C hw/vendor/esl_epfl_x_heep X_HEEP_CFG=$(BASE_DIR)/$(X_HEEP_CFG) MCU_CFG_PERIPHERALS=$(BASE_DIR)/$(MCU_CFG_PERIPHERALS) PAD_CFG=$(BASE_DIR)/$(PAD_CFG) mcu-gen
@@ -22,35 +22,35 @@ verible:
 
 ## Verilator simulation with C++
 verilator-sim:
-	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=verilator $(FUSESOC_FLAGS) --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildsim.log
+	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=verilator $(FUSESOC_FLAGS) --build ceiupm:systems:x_trela ${FUSESOC_PARAM} 2>&1 | tee buildsim.log
 
 run-app-verilator:
 	$(MAKE) app PROJECT=$(PROJECT)
-	cd build/ceiupm_systems_soc_sonhamos_0/sim-verilator/ && ./Vtestharness +firmware=../../../sw/build/main.hex
-	cat build/ceiupm_systems_soc_sonhamos_0/sim-verilator/uart0.log
+	cd build/ceiupm_systems_x_trela_0/sim-verilator/ && ./Vtestharness +firmware=../../../sw/build/main.hex
+	cat build/ceiupm_systems_x_trela_0/sim-verilator/uart0.log
 
 # Questasim simulation
 questasim-sim:
-	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=modelsim $(FUSESOC_FLAGS) --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildsim.log
+	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=modelsim $(FUSESOC_FLAGS) --build ceiupm:systems:x_trela ${FUSESOC_PARAM} 2>&1 | tee buildsim.log
 
 # Questasim simulation with HDL optimized compilation
 questasim-sim-opt: questasim-sim
-	$(MAKE) -C build/ceiupm_systems_soc_sonhamos_0/sim-modelsim opt
+	$(MAKE) -C build/ceiupm_systems_x_trela_0/sim-modelsim opt
 
 run-app-questasim:
 	$(MAKE) app PROJECT=$(PROJECT)
-	$(MAKE) -C build/ceiupm_systems_soc_sonhamos_0/sim-modelsim run RUN_OPT=1 PLUSARGS="c firmware=../../../sw/build/main.hex"
-	cat build/ceiupm_systems_soc_sonhamos_0/sim-modelsim/uart0.log
+	$(MAKE) -C build/ceiupm_systems_x_trela_0/sim-modelsim run RUN_OPT=1 PLUSARGS="c firmware=../../../sw/build/main.hex"
+	cat build/ceiupm_systems_x_trela_0/sim-modelsim/uart0.log
 
 run-gui-app-questasim:
 	$(MAKE) app PROJECT=$(PROJECT)
-	$(MAKE) -C build/ceiupm_systems_soc_sonhamos_0/sim-modelsim run-gui RUN_OPT=1 PLUSARGS="c firmware=../../../sw/build/main.hex"
-	cat build/ceiupm_systems_soc_sonhamos_0/sim-modelsim/uart0.log
+	$(MAKE) -C build/ceiupm_systems_x_trela_0/sim-modelsim run-gui RUN_OPT=1 PLUSARGS="c firmware=../../../sw/build/main.hex"
+	cat build/ceiupm_systems_x_trela_0/sim-modelsim/uart0.log
 
 FPGA_BOARD ?= vc709
 
 vivado-fpga: mcu-gen
-	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) --flag=use_bscane_xilinx --build ceiupm:systems:soc_sonhamos ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) --flag=use_bscane_xilinx --build ceiupm:systems:x_trela ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log
 
 openocd:
 	openocd -f tb/core-v-mini-mcu-vc709-bscan.cfg

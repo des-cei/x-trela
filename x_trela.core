@@ -4,8 +4,8 @@ CAPI=2:
 # Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 # SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
-name: ceiupm:systems:soc_sonhamos
-description: SoC Soñamos (X-HEEP + CGRA + Crypto).
+name: ceiupm:systems:x_trela
+description: X-TRELA SoC(X-HEEP + STRELA CGRA).
 
 filesets:
   files_rtl_generic:
@@ -14,8 +14,8 @@ filesets:
     - openhwgroup.org:systems:core-v-mini-mcu
     - ceiupm::strela
     files:
-    - hw/soc_sonhamos/soc_sonhamos_pkg.sv
-    - hw/soc_sonhamos/soc_sonhamos.sv
+    - hw/x_trela/x_trela_pkg.sv
+    - hw/x_trela/x_trela.sv
     file_type: systemVerilogSource
 
   x_heep_system:
@@ -44,7 +44,7 @@ filesets:
   files_verilator_waiver:
     files:
     - tb/tb.vlt
-    - hw/soc_sonhamos/soc_sonhamos.vlt
+    - hw/x_trela/x_trela.vlt
     file_type: vlt
 
   systemverilog_only_simjtag:
@@ -100,7 +100,7 @@ filesets:
     files:
     - hw/fpga/sram_wrapper.sv
     - hw/fpga_ext/strela_clock_gate.sv
-    - hw/fpga_ext/xilinx_soc_sonhamos_wrapper.sv
+    - hw/fpga_ext/xilinx_x_trela_wrapper.sv
     file_type: systemVerilogSource
 
   ip-fpga:
@@ -333,7 +333,7 @@ targets:
         part: xc7z020clg400-1
         board_part: tul.com.tw:pynq-z2:part0:1.0
         board_repo_paths: [../../../hw/fpga/board_files/vendor/esl_epfl_pynq_z2_board_files]
-    toplevel: [xilinx_soc_sonhamos_wrapper]
+    toplevel: [xilinx_x_trela_wrapper]
 
   vc709:
     <<: *default_target
@@ -358,5 +358,4 @@ targets:
       vivado:
         part: xc7vx690tffg1761-2
         board_part: xilinx.com:vc709:part0:1.8
-        # board_repo_paths: [../../../hw/fpga/board_files/vendor/esl_epfl_pynq_z2_board_files]
-    toplevel: [xilinx_soc_sonhamos_wrapper]
+    toplevel: [xilinx_x_trela_wrapper]
