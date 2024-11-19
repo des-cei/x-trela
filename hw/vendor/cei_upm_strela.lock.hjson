@@ -9,6 +9,6 @@
   upstream:
   {
     url: git@github.com:des-cei/strela.git
-    rev: ce2f5813856a885fab2f104a7db37ff08e213a87
+    rev: d3480cd5f749efcb1e66bd61f05315929cf0adf3
   }
 }
