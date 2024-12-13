@@ -15,6 +15,7 @@ This repository contains benchmark applications for the STRELA CGRA.
 ---
 
 Link to [X-HEEP](https://github.com/esl-epfl/x-heep)
+
 Link to [STRELA](https://github.com/des-cei/strela)
 
 ---
