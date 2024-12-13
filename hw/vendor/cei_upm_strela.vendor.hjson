@@ -7,13 +7,12 @@
   target_dir: "cei_upm_strela",
 
   upstream: {
-    url: "git@github.com:des-cei/strela.git",
-    rev: "d3480cd5f749efcb1e66bd61f05315929cf0adf3",
+    url: "https://github.com/des-cei/strela.git",
+    rev: "7b839b23f7cbd69fa421feed9ea8e264b5424b86",
   },
 
   patch_dir: "patches/cei_upm_strela",
 
   exclude_from_upstream: [
-    "block_diagrams"
   ]
 }
