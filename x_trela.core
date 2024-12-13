@@ -125,6 +125,10 @@ filesets:
     files:
     - hw/fpga_ext/scripts/vc709/xilinx_generate_clk_wizard.tcl:  { file_type: tclSource }
 
+  ip-fpga-genesys2:
+    files:
+    - hw/fpga_ext/scripts/genesys2/xilinx_generate_clk_wizard.tcl:  { file_type: tclSource }
+
   xdc-fpga-pynq-z2:
     files:
     - hw/fpga/constraints/pynq-z2/pin_assign.xdc
@@ -134,6 +138,11 @@ filesets:
   xdc-fpga-vc709:
     files:
     - hw/fpga_ext/constraints/vc709/pin_assign.xdc
+    file_type: xdc
+
+  xdc-fpga-genesys2:
+    files:
+    - hw/fpga_ext/constraints/genesys2/pin_assign.xdc
     file_type: xdc
 
 parameters:
@@ -193,6 +202,10 @@ parameters:
     datatype: bool
     paramtype: vlogdefine
     default: false
+  FPGA_GENESYS2:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
   # Make the parameter known to FuseSoC to enable overrides from the
   # command line. If not overwritten, use the generic technology library.
   PRIM_DEFAULT_IMPL:
@@ -227,7 +240,7 @@ targets:
   default: &default_target
     filesets:
     - files_rtl_generic
-    toplevel: [cgra_x_heep_top]
+    toplevel: [x_trela]
 
   sim:
     <<: *default_target
@@ -358,4 +371,30 @@ targets:
       vivado:
         part: xc7vx690tffg1761-2
         board_part: xilinx.com:vc709:part0:1.8
+    toplevel: [xilinx_x_trela_wrapper]
+
+  genesys2:
+    <<: *default_target
+    default_tool: vivado
+    description: Digilent GENESYS2 Evaluation Board
+    filesets_append:
+    - rtl-fpga
+    - ip-fpga
+    - ip-fpga-genesys2
+    - xdc-fpga-genesys2
+    - ext_bus
+    - x_heep_system
+    parameters:
+    - COREV_PULP
+    - FPU
+    - X_EXT
+    - SYNTHESIS=true
+    - REMOVE_OBI_FIFO
+    - FPGA_SYNTHESIS=true
+    - FPGA_GENESYS2=true
+    tools:
+      vivado:
+        part: xc7k325tffg900-2
+        board_part: digilentinc.com:genesys2:part0:1.1
+        board_repo_paths: [../../../hw/fpga_ext/board_files/genesys2]
     toplevel: [xilinx_x_trela_wrapper]

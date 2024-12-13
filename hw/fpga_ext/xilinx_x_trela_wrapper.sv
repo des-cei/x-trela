@@ -16,6 +16,9 @@ module xilinx_x_trela_wrapper
 `ifdef FPGA_VC709
     input logic sys_diff_clock_clk_n,
     input logic sys_diff_clock_clk_p,
+`elsif FPGA_GENESYS2
+    input logic sys_diff_clock_clk_n,
+    input logic sys_diff_clock_clk_p,
 `else
     inout logic clk_i,
 `endif
@@ -71,8 +74,12 @@ module xilinx_x_trela_wrapper
   logic [CLK_LED_COUNT_LENGTH - 1:0] clk_count;
   wire  [                      32:0] gpio;
 
-  // low active reset
-  assign rst_n = !rst_i;
+  // reset polarity
+  `ifdef FPGA_GENESYS2
+    assign rst_n = rst_i;
+  `else 
+    assign rst_n = !rst_i;
+  `endif
 
   // reset LED for debugging
   assign rst_led_o = rst_n;
@@ -92,6 +99,12 @@ module xilinx_x_trela_wrapper
   if_xif #() ext_if ();
 
 `ifdef FPGA_VC709
+  xilinx_clk_wizard_wrapper xilinx_clk_wizard_wrapper_i (
+      .sys_diff_clock_clk_n,
+      .sys_diff_clock_clk_p,
+      .clk_out1_0(clk_gen)
+  );
+`elsif FPGA_GENESYS2
   xilinx_clk_wizard_wrapper xilinx_clk_wizard_wrapper_i (
       .sys_diff_clock_clk_n,
       .sys_diff_clock_clk_p,

@@ -52,7 +52,10 @@ FPGA_BOARD ?= vc709
 vivado-fpga: mcu-gen
 	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) --flag=use_bscane_xilinx --build ceiupm:systems:x_trela ${FUSESOC_PARAM} 2>&1 | tee buildvivado.log
 
-openocd:
+openocd-genesys2:
+	openocd -f tb/core-v-mini-mcu-genesys2-bscan.cfg
+
+openocd-vc709:
 	openocd -f tb/core-v-mini-mcu-vc709-bscan.cfg
 
 gdb:
